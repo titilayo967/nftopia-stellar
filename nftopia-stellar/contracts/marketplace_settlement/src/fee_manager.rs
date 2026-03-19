@@ -47,11 +47,7 @@ impl FeeManager {
         let discount_bps: u64 = Self::calculate_volume_discount(user_volume, &fee_config.volume_discounts)?;
 
         // Apply discount to base fee
-        let discounted_fee_bps = if fee_config.platform_fee_bps > discount_bps {
-            fee_config.platform_fee_bps - discount_bps
-        } else {
-            0
-        };
+        let discounted_fee_bps = fee_config.platform_fee_bps.saturating_sub(discount_bps);
 
         // Check for VIP exemptions
         if fee_config.vip_exemptions.contains(user.clone()) {
@@ -398,7 +394,7 @@ impl FeeCalculator {
         current_hour: u64
     ) -> Result<i128, SettlementError> {
         // Lower fees during off-peak hours (e.g., 2-6 AM)
-        let discount = if current_hour >= 2 && current_hour <= 6 {
+        let discount = if (2..=6).contains(&current_hour) {
             25 // 25% discount
         } else {
             0

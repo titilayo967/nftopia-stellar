@@ -49,6 +49,7 @@ pub struct AtomicSwapEngine;
 
 impl AtomicSwapEngine {
     /// Initialize an atomic swap for a transaction
+    #[allow(clippy::too_many_arguments)]
     pub fn initialize_swap(
         env: &Env,
         transaction_id: u64,

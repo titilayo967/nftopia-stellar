@@ -31,6 +31,7 @@ pub struct AuctionEngine;
 
 impl AuctionEngine {
     /// Create a new auction
+    #[allow(clippy::too_many_arguments)]
     pub fn create_auction(
         env: &Env,
         auction_type: AuctionType,
@@ -207,7 +208,7 @@ impl AuctionEngine {
             let event = AuctionExtendedEvent {
                 auction_id,
                 new_end_time,
-                extension_reason: Bytes::from_slice(&env, "last_minute_bid".as_bytes()),
+                extension_reason: Bytes::from_slice(env, "last_minute_bid".as_bytes()),
                 timestamp,
             };
             emit_auction_extended(env, event);

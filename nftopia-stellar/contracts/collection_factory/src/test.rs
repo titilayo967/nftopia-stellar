@@ -1,5 +1,3 @@
-#![cfg(test)]
-
 use crate::collection::{NftCollection, NftCollectionClient};
 use crate::factory::{CollectionFactory, CollectionFactoryClient};
 use crate::types::CollectionConfig;
@@ -14,7 +12,7 @@ fn test_factory_logic() {
     let _creator = Address::generate(&env);
 
     // Register Factory
-    let factory_id = env.register_contract(None, CollectionFactory);
+    let factory_id = env.register(CollectionFactory, ());
     let factory_client = CollectionFactoryClient::new(&env, &factory_id);
 
     // Initialize Factory
@@ -32,7 +30,7 @@ fn test_collection_logic() {
     let user1 = Address::generate(&env);
     let user2 = Address::generate(&env);
 
-    let collection_id = env.register_contract(None, NftCollection);
+    let collection_id = env.register(NftCollection, ());
     let collection_client = NftCollectionClient::new(&env, &collection_id);
 
     // Collection Config
@@ -81,7 +79,7 @@ fn test_unauthorized_mint() {
     let admin = Address::generate(&env);
     let _user = Address::generate(&env);
 
-    let collection_id = env.register_contract(None, NftCollection);
+    let collection_id = env.register(NftCollection, ());
     let collection_client = NftCollectionClient::new(&env, &collection_id);
 
     let config = CollectionConfig {

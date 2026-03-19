@@ -51,11 +51,7 @@ pub fn has_time_elapsed(reference: u64, required_seconds: u64, env: &Env) -> boo
 /// Calculate remaining time until expiration
 pub fn remaining_time(expires_at: u64, env: &Env) -> u64 {
     let now = current_timestamp(env);
-    if now >= expires_at {
-        0
-    } else {
-        expires_at - now
-    }
+    expires_at.saturating_sub(now)
 }
 
 /// Validate auction timing parameters

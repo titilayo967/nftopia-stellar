@@ -167,7 +167,7 @@ impl RoyaltyDistributor {
 
         match royalty_configs.get(key) {
             Some(info) => Ok(info),
-            None => return Err(SettlementError::NotFound),
+            None => Err(SettlementError::NotFound),
         }
     }
 
@@ -308,10 +308,9 @@ impl RoyaltyDistributor {
 
     /// Internal: Create storage key for royalty info
     fn make_royalty_key(_nft_contract: &Address, _token_id: u64) -> RoyaltyKey {
-        let key = Bytes::new(&Env::default());
         // Convert address and token_id to bytes and append
         // This is a simplified implementation - in practice you'd need proper serialization
-        key
+        Bytes::new(&Env::default())
     }
 
     /// Internal: Store royalty information

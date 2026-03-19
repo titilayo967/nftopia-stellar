@@ -22,6 +22,7 @@ use crate::utils::{asset_utils, time_utils};
 pub struct MarketplaceSettlement;
 
 /// Implementation of the Marketplace Settlement Contract
+#[allow(clippy::too_many_arguments)]
 #[contractimpl]
 impl MarketplaceSettlement {
     /// Initialize the contract with admin configuration

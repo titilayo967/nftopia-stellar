@@ -65,7 +65,7 @@ impl CommitRevealScheme {
 
         let (stored_hash, reveal_deadline) = bidder_commitments
             .get(auction_id)
-            .unwrap_or((Bytes::new(&env), 0));
+            .unwrap_or((Bytes::new(env), 0));
 
         // Check if reveal deadline has passed
         let current_time = env.ledger().timestamp();
@@ -181,12 +181,11 @@ impl FrontRunningDetector {
         let time_window = 60; // 60 seconds
 
         for bid in recent_bids.iter() {
-            if bid.bidder == new_bid.bidder {
-                if new_bid.placed_at - bid.placed_at < time_window {
-                    same_bidder_count += 1;
-                    if same_bidder_count >= 3 {
-                        return true;
-                    }
+            if bid.bidder == new_bid.bidder
+                && new_bid.placed_at - bid.placed_at < time_window {
+                same_bidder_count += 1;
+                if same_bidder_count >= 3 {
+                    return true;
                 }
             }
         }
@@ -228,11 +227,7 @@ impl FrontRunningDetector {
         // Check if new bid follows similar pattern
         if let Some(last_interval) = intervals.get(intervals.len() - 1) {
             let new_interval = new_bid.placed_at - recent_bids.get(recent_bids.len() - 1).unwrap().placed_at;
-            let diff = if new_interval > last_interval {
-                new_interval - last_interval
-            } else {
-                last_interval - new_interval
-            };
+            let diff = new_interval.abs_diff(last_interval);
 
             // If timing is too regular (within 5 seconds), flag as suspicious
             diff < 5

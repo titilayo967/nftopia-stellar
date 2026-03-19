@@ -104,7 +104,7 @@ impl FunctionLock {
 macro_rules! non_reentrant {
     ($env:expr, $caller:expr, $function_name:expr, $body:block) => {
         {
-            use crate::security::reentrancy_guard::ReentrancyGuard;
+            use $crate::security::reentrancy_guard::ReentrancyGuard;
             ReentrancyGuard::execute($env, $caller, $function_name, || $body)
         }
     };
@@ -115,7 +115,7 @@ macro_rules! non_reentrant {
 macro_rules! function_lock {
     ($env:expr, $function_key:expr, $caller:expr, $body:block) => {
         {
-            use crate::security::reentrancy_guard::FunctionLock;
+            use $crate::security::reentrancy_guard::FunctionLock;
             FunctionLock::execute($env, $function_key, $caller, || $body)
         }
     };
