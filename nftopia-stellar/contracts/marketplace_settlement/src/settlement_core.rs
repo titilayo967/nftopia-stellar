@@ -44,13 +44,10 @@ impl MarketplaceSettlement {
 
         // Set default fee config
         let fee_config = FeeConfig {
-            platform_fee_bps: 250, // 2.5%
-            minimum_fee: 1000,     // Minimum 1000 units
-            maximum_fee: 1000000,  // Maximum 1M units
-            fee_recipient: Address::from_string(&soroban_sdk::String::from_str(
-                &env,
-                "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-            )), // Fee recipient address
+            platform_fee_bps: 250,        // 2.5%
+            minimum_fee: 1000,            // Minimum 1000 units
+            maximum_fee: 1000000,         // Maximum 1M units
+            fee_recipient: admin.clone(), // Fee recipient defaults to admin
             dynamic_fee_enabled: true,
             volume_discounts: {
                 let mut discounts = Vec::new(&env);
