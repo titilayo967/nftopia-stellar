@@ -11,13 +11,18 @@ import { NftModule } from './nft/nft.module';
 import { AuctionModule } from './modules/auction/auction.module';
 import { ListingModule } from './modules/listing/listing.module';
 import { LoggerModule } from 'nestjs-pino';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { StorageModule } from './storage/storage.module';
 import { GraphqlGatewayModule } from './graphql/graphql.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { RateLimitInterceptor } from './common/interceptors/rate-limit.interceptor';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot({ ttl: 60, limit: 100 }),
+    // Throttler configured globally for rate limiting.
     LoggerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
@@ -95,6 +100,14 @@ import { GraphqlGatewayModule } from './graphql/graphql.module';
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: RateLimitInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })
