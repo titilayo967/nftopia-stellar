@@ -9,11 +9,11 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { NftModule } from './nft/nft.module';
 import { AuctionModule } from './modules/auction/auction.module';
+import { ListingModule } from './modules/listing/listing.module';
 import { LoggerModule } from 'nestjs-pino';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { StorageModule } from './storage/storage.module';
-import { MarketplaceModule } from './marketplace/marketplace.module';
 
 @Module({
   imports: [
@@ -76,8 +76,6 @@ import { MarketplaceModule } from './marketplace/marketplace.module';
               password: config.get<string>('DB_PASS') || process.env.DB_PASS,
               database: config.get<string>('DB_NAME') || process.env.DB_NAME,
               autoLoadEntities: true,
-              // Temporary: enable synchronize for local development to create missing tables.
-              // TODO: set to false for production and apply migrations instead.
               synchronize: true,
             }),
           }),
@@ -85,8 +83,9 @@ import { MarketplaceModule } from './marketplace/marketplace.module';
         ]),
     NftModule,
     AuctionModule,
+    // Listing module
+    ListingModule,
     StorageModule,
-    MarketplaceModule,
   ],
   controllers: [AppController],
   providers: [
