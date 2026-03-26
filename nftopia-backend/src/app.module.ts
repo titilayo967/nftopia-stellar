@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -17,6 +18,7 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { StorageModule } from './storage/storage.module';
 import { GraphqlGatewayModule } from './graphql/graphql.module';
 import { RedisRateGuard } from './common/guards/redis-rate.guard';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -45,6 +47,7 @@ import { RedisRateGuard } from './common/guards/redis-rate.guard';
       }),
     }),
     ConfigModule.forRoot({ isGlobal: true }),
+    EventEmitterModule.forRoot(),
     CacheModule.registerAsync({
       isGlobal: true,
       inject: [ConfigService],
@@ -89,6 +92,7 @@ import { RedisRateGuard } from './common/guards/redis-rate.guard';
     ListingModule,
     OrderModule,
     StorageModule,
+    SearchModule,
     GraphqlGatewayModule,
   ],
   controllers: [AppController],
