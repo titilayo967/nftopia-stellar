@@ -6,6 +6,7 @@ import {
   NotFoundException,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Nft } from './entities/nft.entity';
@@ -33,6 +34,7 @@ export class NftService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly sorobanService: SorobanService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(query: NftQueryDto): Promise<NftQueryResult<Nft>> {
@@ -176,7 +178,9 @@ export class NftService {
       await this.metadataRepository.save(attributes);
     }
 
-    return this.findById(savedNft.id);
+    const indexedNft = await this.findById(savedNft.id);
+    this.emitSearchEvent('search.nft.upsert', { nftId: indexedNft.id });
+    return indexedNft;
   }
 
   async update(id: string, dto: UpdateNftDto, callerId: string): Promise<Nft> {
@@ -229,7 +233,9 @@ export class NftService {
       }
     }
 
-    return this.findById(nft.id);
+    const indexedNft = await this.findById(nft.id);
+    this.emitSearchEvent('search.nft.upsert', { nftId: indexedNft.id });
+    return indexedNft;
   }
 
   async burn(id: string, callerId: string): Promise<BurnNftResponse> {
@@ -245,6 +251,7 @@ export class NftService {
 
     nft.isBurned = true;
     await this.nftRepository.save(nft);
+    this.emitSearchEvent('search.nft.delete', { nftId: nft.id });
 
     return {
       id: nft.id,
@@ -299,5 +306,11 @@ export class NftService {
       tokenId,
       contractAddress,
     };
+  }
+
+  private emitSearchEvent(eventName: string, payload: Record<string, string>) {
+    setImmediate(() => {
+      this.eventEmitter.emit(eventName, payload);
+    });
   }
 }

@@ -54,6 +54,7 @@ async function bootstrapRestApi() {
     .addTag('nft', 'NFT operations')
     .addTag('marketplace', 'Marketplace operations')
     .addTag('users', 'User operations')
+    .addTag('search', 'Search and discovery operations')
     .addBearerAuth()
     .build();
 
