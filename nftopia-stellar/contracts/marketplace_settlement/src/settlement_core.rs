@@ -6,6 +6,7 @@ use crate::fee_manager::FeeManager;
 use crate::royalty_distributor::RoyaltyDistributor;
 use crate::security::reentrancy_guard::ReentrancyGuard;
 use crate::storage::{
+    allowlist_store::AllowlistStore,
     auction_store::AuctionStore,
     transaction_store::{BundleTransactionStore, SaleTransactionStore, TradeTransactionStore},
 };
@@ -86,6 +87,7 @@ impl MarketplaceSettlement {
         currency: Asset,
         duration_seconds: u64,
     ) -> Result<u64, SettlementError> {
+        seller.require_auth();
         ReentrancyGuard::execute(&env, &seller, "create_sale", || {
             // Validate inputs
             asset_utils::validate_asset(&currency, &Vec::new(&env), &env)?;
@@ -150,6 +152,7 @@ impl MarketplaceSettlement {
         buyer: Address,
         payment_amount: i128,
     ) -> Result<ExecutionResult, SettlementError> {
+        buyer.require_auth();
         ReentrancyGuard::execute(&env, &buyer, "execute_sale", || {
             let mut sale = SaleTransactionStore::get(&env, transaction_id)?;
 
@@ -216,6 +219,7 @@ impl MarketplaceSettlement {
         auction_type: AuctionType,
         currency: Asset,
     ) -> Result<u64, SettlementError> {
+        seller.require_auth();
         ReentrancyGuard::execute(&env, &seller, "create_auction", || {
             AuctionEngine::create_auction(
                 &env,
@@ -240,6 +244,7 @@ impl MarketplaceSettlement {
         bid_amount: i128,
         commitment_hash: Option<Bytes>,
     ) -> Result<(), SettlementError> {
+        bidder.require_auth();
         ReentrancyGuard::execute(&env, &bidder, "place_bid", || {
             AuctionEngine::place_bid(&env, auction_id, &bidder, bid_amount, commitment_hash)
         })
@@ -253,6 +258,7 @@ impl MarketplaceSettlement {
         bid_amount: i128,
         salt: Bytes,
     ) -> Result<(), SettlementError> {
+        bidder.require_auth();
         ReentrancyGuard::execute(&env, &bidder, "reveal_bid", || {
             AuctionEngine::reveal_bid(&env, auction_id, &bidder, bid_amount, &salt)
         })
@@ -260,6 +266,7 @@ impl MarketplaceSettlement {
 
     /// End an auction
     pub fn end_auction(env: Env, auction_id: u64, caller: Address) -> Result<(), SettlementError> {
+        caller.require_auth();
         ReentrancyGuard::execute(&env, &caller, "end_auction", || {
             AuctionEngine::end_auction(&env, auction_id, &caller)
         })
@@ -274,6 +281,7 @@ impl MarketplaceSettlement {
         counterparty_nfts: Vec<crate::types::NFTItem>,
         duration_seconds: u64,
     ) -> Result<u64, SettlementError> {
+        initiator.require_auth();
         ReentrancyGuard::execute(&env, &initiator, "create_trade", || {
             // Validate trade parameters
             if initiator_nfts.is_empty() {
@@ -301,6 +309,7 @@ impl MarketplaceSettlement {
 
     /// Accept a trade
     pub fn accept_trade(env: Env, trade_id: u64, acceptor: Address) -> Result<(), SettlementError> {
+        acceptor.require_auth();
         ReentrancyGuard::execute(&env, &acceptor.clone(), "accept_trade", || {
             let mut trade = TradeTransactionStore::get(&env, trade_id)?;
 
@@ -326,6 +335,7 @@ impl MarketplaceSettlement {
         trade_id: u64,
         executor: Address,
     ) -> Result<(), SettlementError> {
+        executor.require_auth();
         ReentrancyGuard::execute(&env, &executor, "execute_trade", || {
             let mut trade = TradeTransactionStore::get(&env, trade_id)?;
 
@@ -351,6 +361,7 @@ impl MarketplaceSettlement {
         currency: Asset,
         duration_seconds: u64,
     ) -> Result<u64, SettlementError> {
+        seller.require_auth();
         ReentrancyGuard::execute(&env, &seller, "create_bundle", || {
             if items.is_empty() {
                 return Err(SettlementError::InvalidAmount);
@@ -383,6 +394,7 @@ impl MarketplaceSettlement {
         transaction_type: Symbol, // "sale", "auction", "trade", "bundle"
         canceller: Address,
     ) -> Result<(), SettlementError> {
+        canceller.require_auth();
         ReentrancyGuard::execute(&env, &canceller, "cancel_transaction", || {
             if transaction_type == Symbol::new(&env, "sale") {
                 let mut sale = SaleTransactionStore::get(&env, transaction_id)?;
@@ -409,6 +421,7 @@ impl MarketplaceSettlement {
         evidence_uri: Option<Bytes>,
         initiator: Address,
     ) -> Result<u64, SettlementError> {
+        initiator.require_auth();
         ReentrancyGuard::execute(&env, &initiator, "initiate_dispute", || {
             DisputeResolutionManager::initiate_dispute(
                 &env,
@@ -428,6 +441,7 @@ impl MarketplaceSettlement {
         arbitrator: Address,
         vote: u64,
     ) -> Result<(), SettlementError> {
+        arbitrator.require_auth();
         ReentrancyGuard::execute(&env, &arbitrator, "vote_on_dispute", || {
             DisputeResolutionManager::vote_on_dispute(&env, dispute_id, &arbitrator, vote)
         })
@@ -439,6 +453,7 @@ impl MarketplaceSettlement {
         dispute_id: u64,
         executor: Address,
     ) -> Result<(), SettlementError> {
+        executor.require_auth();
         ReentrancyGuard::execute(&env, &executor, "execute_dispute_resolution", || {
             DisputeResolutionManager::execute_dispute_resolution(&env, dispute_id, &executor)
         })
@@ -451,6 +466,7 @@ impl MarketplaceSettlement {
         reason: Bytes,
         admin: Address,
     ) -> Result<(), SettlementError> {
+        admin.require_auth();
         // Check admin permissions
         let admin_config: AdminConfig = env
             .storage()
@@ -475,6 +491,7 @@ impl MarketplaceSettlement {
         new_config: FeeConfig,
         admin: Address,
     ) -> Result<(), SettlementError> {
+        admin.require_auth();
         // Check admin permissions
         let admin_config: AdminConfig = env
             .storage()
@@ -496,6 +513,7 @@ impl MarketplaceSettlement {
         recipient: Address,
         admin: Address,
     ) -> Result<i128, SettlementError> {
+        admin.require_auth();
         // Check admin permissions
         let admin_config: AdminConfig = env
             .storage()
@@ -538,5 +556,65 @@ impl MarketplaceSettlement {
     /// Cleanup expired commitments
     pub fn cleanup_expired_commitments(env: Env) -> Result<(), SettlementError> {
         AuctionEngine::cleanup_expired_commitments(&env)
+    }
+
+    /// Add allowed NFT contract (admin only)
+    pub fn add_allowed_nft_contract(env: Env, admin: Address, contract: Address) -> Result<(), SettlementError> {
+        admin.require_auth();
+        let admin_config: AdminConfig = env
+            .storage()
+            .instance()
+            .get(&symbol_short!("admin_cfg"))
+            .ok_or(SettlementError::Unauthorized)?;
+        if admin_config.admin != admin {
+            return Err(SettlementError::Unauthorized);
+        }
+        AllowlistStore::set_nft_allowed(&env, &contract, true);
+        Ok(())
+    }
+
+    /// Remove allowed NFT contract (admin only)
+    pub fn remove_allowed_nft_contract(env: Env, admin: Address, contract: Address) -> Result<(), SettlementError> {
+        admin.require_auth();
+        let admin_config: AdminConfig = env
+            .storage()
+            .instance()
+            .get(&symbol_short!("admin_cfg"))
+            .ok_or(SettlementError::Unauthorized)?;
+        if admin_config.admin != admin {
+            return Err(SettlementError::Unauthorized);
+        }
+        AllowlistStore::set_nft_allowed(&env, &contract, false);
+        Ok(())
+    }
+
+    /// Add allowed token contract (admin only)
+    pub fn add_allowed_token_contract(env: Env, admin: Address, contract: Address) -> Result<(), SettlementError> {
+        admin.require_auth();
+        let admin_config: AdminConfig = env
+            .storage()
+            .instance()
+            .get(&symbol_short!("admin_cfg"))
+            .ok_or(SettlementError::Unauthorized)?;
+        if admin_config.admin != admin {
+            return Err(SettlementError::Unauthorized);
+        }
+        AllowlistStore::set_token_allowed(&env, &contract, true);
+        Ok(())
+    }
+
+    /// Remove allowed token contract (admin only)
+    pub fn remove_allowed_token_contract(env: Env, admin: Address, contract: Address) -> Result<(), SettlementError> {
+        admin.require_auth();
+        let admin_config: AdminConfig = env
+            .storage()
+            .instance()
+            .get(&symbol_short!("admin_cfg"))
+            .ok_or(SettlementError::Unauthorized)?;
+        if admin_config.admin != admin {
+            return Err(SettlementError::Unauthorized);
+        }
+        AllowlistStore::set_token_allowed(&env, &contract, false);
+        Ok(())
     }
 }
