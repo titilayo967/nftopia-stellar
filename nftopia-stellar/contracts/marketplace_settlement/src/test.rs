@@ -81,13 +81,13 @@ fn test_accumulated_fees_start_zero() {
 
 #[test]
 fn test_create_sale_success() {
-    let (env, cid, client, _admin) = new_env();
-    let _asset = mk_asset(&env);
+    let (env, cid, client, admin) = new_env();
+    let asset = mk_asset(&env);
     let seller = Address::generate(&env);
     let nft = Address::generate(&env);
     let creator = Address::generate(&env);
-    reg(&env, &cid, &nft, &creator, &_admin, &_asset);
-    let id = client.create_sale(&seller, &nft, &1u64, &1_000_000i128, &_asset, &86400u64);
+    reg(&env, &cid, &nft, &creator, &admin, &asset);
+    let id = client.create_sale(&seller, &nft, &1u64, &1_000_000i128, &asset, &86400u64);
     assert_eq!(id, 1u64);
 }
 
@@ -107,26 +107,26 @@ fn test_get_sale_after_create() {
 
 #[test]
 fn test_cancel_sale_by_seller() {
-    let (env, cid, client, _admin) = new_env();
-    let _asset = mk_asset(&env);
+    let (env, cid, client, admin) = new_env();
+    let asset = mk_asset(&env);
     let seller = Address::generate(&env);
     let nft = Address::generate(&env);
     let creator = Address::generate(&env);
-    reg(&env, &cid, &nft, &creator, &_admin, &_asset);
-    let id = client.create_sale(&seller, &nft, &1u64, &1_000_000i128, &_asset, &86400u64);
+    reg(&env, &cid, &nft, &creator, &admin, &asset);
+    let id = client.create_sale(&seller, &nft, &1u64, &1_000_000i128, &asset, &86400u64);
     client.cancel_transaction(&id, &Symbol::new(&env, "sale"), &seller);
 }
 
 #[test]
 fn test_cancel_sale_non_seller_fails() {
-    let (env, cid, client, _admin) = new_env();
-    let _asset = mk_asset(&env);
+    let (env, cid, client, admin) = new_env();
+    let asset = mk_asset(&env);
     let seller = Address::generate(&env);
     let attacker = Address::generate(&env);
     let nft = Address::generate(&env);
     let creator = Address::generate(&env);
-    reg(&env, &cid, &nft, &creator, &_admin, &_asset);
-    let id = client.create_sale(&seller, &nft, &1u64, &1_000_000i128, &_asset, &86400u64);
+    reg(&env, &cid, &nft, &creator, &admin, &asset);
+    let id = client.create_sale(&seller, &nft, &1u64, &1_000_000i128, &asset, &86400u64);
     assert!(client
         .try_cancel_transaction(&id, &Symbol::new(&env, "sale"), &attacker)
         .is_err());
@@ -134,14 +134,14 @@ fn test_cancel_sale_non_seller_fails() {
 
 #[test]
 fn test_execute_sale_wrong_payment_fails() {
-    let (env, cid, client, _admin) = new_env();
-    let _asset = mk_asset(&env);
+    let (env, cid, client, admin) = new_env();
+    let asset = mk_asset(&env);
     let seller = Address::generate(&env);
     let buyer = Address::generate(&env);
     let nft = Address::generate(&env);
     let creator = Address::generate(&env);
-    reg(&env, &cid, &nft, &creator, &_admin, &_asset);
-    let id = client.create_sale(&seller, &nft, &1u64, &1_000_000i128, &_asset, &86400u64);
+    reg(&env, &cid, &nft, &creator, &admin, &asset);
+    let id = client.create_sale(&seller, &nft, &1u64, &1_000_000i128, &asset, &86400u64);
     assert!(client.try_execute_sale(&id, &buyer, &999_999i128).is_err());
 }
 
@@ -281,7 +281,7 @@ fn test_get_nonexistent_auction_fails() {
 #[test]
 fn test_update_fee_config_by_admin() {
     use crate::types::FeeConfig;
-    let (env, _cid, client, _admin) = new_env();
+    let (env, _cid, _client, _admin) = new_env();
     let _asset = mk_asset(&env);
     let admin = Address::generate(&env);
     let cfg = FeeConfig {
