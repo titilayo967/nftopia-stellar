@@ -338,13 +338,13 @@ export class MarketplaceSettlementClient {
    * Returns { events, latestLedger } where latestLedger is the highest ledger
    * examined so the caller can advance its cursor even when no events exist.
    */
-  async getEventsSince(
+  getEventsSince(
     fromLedger: number,
   ): Promise<{ events: Record<string, unknown>[]; latestLedger: number }> {
     this.logger.debug(
       `getEventsSince stub called with fromLedger=${fromLedger}`,
     );
-    return { events: [], latestLedger: fromLedger };
+    return Promise.resolve({ events: [], latestLedger: fromLedger });
   }
 
   /**

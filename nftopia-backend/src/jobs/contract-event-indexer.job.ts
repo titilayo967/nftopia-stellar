@@ -103,14 +103,13 @@ export class ContractEventIndexerJob {
    * TODO(#249): Replace this stub with real persistence logic (e.g. insert
    * into a contract_events table, update NFT state, emit domain events, etc.)
    */
-  private async persistEvents(
-    events: Record<string, unknown>[],
-  ): Promise<void> {
+  private persistEvents(events: Record<string, unknown>[]): Promise<void> {
     if (events.length === 0) {
-      return;
+      return Promise.resolve();
     }
     this.logger.debug(
       `persistEvents stub: ${events.length} event(s) would be persisted here.`,
     );
+    return Promise.resolve();
   }
 }

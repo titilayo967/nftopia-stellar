@@ -10,7 +10,9 @@ import { MarketplaceSettlementClient } from '../modules/stellar/marketplace-sett
 
 describe('ContractEventIndexerJob', () => {
   let job: ContractEventIndexerJob;
-  let settingsRepo: jest.Mocked<Pick<Repository<SystemSettings>, 'findOne' | 'save'>>;
+  let settingsRepo: jest.Mocked<
+    Pick<Repository<SystemSettings>, 'findOne' | 'save'>
+  >;
   let settlementClient: { getEventsSince: jest.Mock };
 
   beforeEach(async () => {
@@ -40,9 +42,7 @@ describe('ContractEventIndexerJob', () => {
     job = module.get<ContractEventIndexerJob>(ContractEventIndexerJob);
   });
 
-  // ---------------------------------------------------------------------------
   // loadCursor
-  // ---------------------------------------------------------------------------
 
   describe('loadCursor', () => {
     it('should return 0 when no cursor is stored', async () => {
@@ -68,9 +68,7 @@ describe('ContractEventIndexerJob', () => {
     });
   });
 
-  // ---------------------------------------------------------------------------
   // advanceCursor — monotonic guard
-  // ---------------------------------------------------------------------------
 
   describe('advanceCursor', () => {
     it('should save when newLedger > current', async () => {
@@ -121,9 +119,7 @@ describe('ContractEventIndexerJob', () => {
     });
   });
 
-  // ---------------------------------------------------------------------------
   // handleIndexing — full flow
-  // ---------------------------------------------------------------------------
 
   describe('handleIndexing', () => {
     it('should bootstrap from 0, fetch events, and advance cursor', async () => {
